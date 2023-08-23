@@ -20,8 +20,6 @@ def game():
                 print('----------{}정답입니다!----------'.format(admin))
                 print('시도 횟수: ' + str(count))
                 return count
-            elif num_a < admin:
-                print('---1에서 100 사이의 숫자만 입력해주세요!---')
             elif num < admin:
                 print('----------{}보다 작습니다!----------'.format(admin))
                 print('시도 횟수: ' + str(count))
