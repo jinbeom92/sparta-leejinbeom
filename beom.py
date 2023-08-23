@@ -48,8 +48,8 @@ def main():
                         users[nickname] = game_result
                 else:
                     users[nickname] = game_result
-        restart = input('게임을 다시 시작하겠습니까? (Y, N): ')
-        if restart.lower() != 'y':
+        restart = input('게임을 다시 시작하겠습니까? (네, 아니요): ')
+        if restart.lower() != '네':
             print('게임을 종료합니다!')
 
             if nickname in users:
