@@ -1,4 +1,5 @@
 import hashlib
+import csv
 
 
 class Member:
@@ -23,38 +24,85 @@ class Post:
         self.author = author
 
 
-member_list = []
-while True:
-    name = input("등록할 ID를 입력해주세요!: ")
-    username = input("닉네임을 입력해주세요!: ")
-    password = input("비밀번호를 입력해주세요!: ")
-    member = Member(name, username, password)
-    member_list.append(member)
+def save_members_to_csv(member_list, csv_path):
+    with open(csv_path, "w", newline='', encoding="utf-8") as csv_file:
+        csv_writer = csv.writer(csv_file)
+        csv_writer.writerow(["Name", "Username", "Password"])
+        for member in member_list:
+            csv_writer.writerow(
+                [member.name, member.username, member.password])
 
-    more_members = input("회원 등록 하시겠습니까? (yes/no): ")
-    if more_members.lower() != "yes":
-        break
 
-post_list = []
-for member in member_list:
-    for i in range(3):
-        title = input(f"{member.name}회원 {i+1}의 제목을 입력해주세요!: ")
-        content = input(f"{member.name}회원 {i+1}의 내용을 입력해주세요!: ")
-        post_instance = Post(title, content, member.username)
-        post_list.append(post_instance)
+def load_members_from_csv(csv_path):
+    member_list = []
+    with open(csv_path, "r", newline='', encoding="utf-8") as csv_file:
+        csv_reader = csv.reader(csv_file)
+        next(csv_reader)
+        for row in csv_reader:
+            if len(row) == 3:
+                name, username, password = row
+                member = Member(name, username, password)
+                member_list.append(member)
+    return member_list
 
-print("\n등록된 회원들:")
-for member in member_list:
-    print(member.name)
 
-specific_user = input("\n게시물을 보려면 닉네임을 입력하세요!: ")
-print(f"\nPosts by {specific_user}:")
-for post in post_list:
-    if post.author == specific_user:
-        print(post.title)
+def save_posts_to_csv(post_list, csv_path):
+    with open(csv_path, "w", newline='', encoding="utf-8") as csv_file:
+        csv_writer = csv.writer(csv_file)
+        csv_writer.writerow(["Title", "Content", "Author"])
+        for post in post_list:
+            csv_writer.writerow([post.title, post.content, post.author])
 
-specific_word = input("\n검색할 단어(내용): ")
-print(f"\n검색된 단어들 '{specific_word}' in content:")
-for post in post_list:
-    if specific_word in post.content:
-        print(post.title)
+
+def load_posts_from_csv(csv_path):
+    post_list = []
+    with open(csv_path, "r", newline='', encoding="utf-8") as csv_file:
+        csv_reader = csv.reader(csv_file)
+        next(csv_reader)
+        for row in csv_reader:
+            if len(row) == 3:
+                title, content, author = row
+                post = Post(title, content, author)
+                post_list.append(post)
+    return post_list
+
+
+csv_path_members = "class1.csv"
+csv_path_posts = "class2.csv"
+
+member_list = load_members_from_csv(csv_path_members)
+post_list = load_posts_from_csv(csv_path_posts)
+
+search_option = input(
+    "사용자 등록을 하시겠습니까? 아니면 검색을 바로 하시겠습니까? (등록/검색): ").strip()
+
+if search_option.lower() == "등록":
+    while True:
+        name = input("이름을 등록해주세요: ")
+        username = input("닉네임을 입력해주세요: ")
+        password = input("비밀번호를 입력해주세요: ")
+        member = Member(name, username, password)
+        member_list.append(member)
+
+        more_members = input("회원 등록 하시겠습니까? (yes/no): ").strip()
+        if more_members.lower() != "yes":
+            break
+
+    save_members_to_csv(member_list, csv_path_members)
+    save_posts_to_csv(post_list, csv_path_posts)
+
+elif search_option.lower() == "검색":
+    specific_user = input("\n닉네임을 검색하여 게시물을 불러옵니다. 닉네임을 입력하세요: ")
+    print(f"\n'{specific_user}'님의 게시물:")
+    for post in post_list:
+        if post.author == specific_user:
+            print(f"제목: {post.title}\n내용: {post.content}\n")
+
+    specific_word = input("\n검색할 단어(제목 또는 내용)를 입력하세요: ")
+    print(f"\n'{specific_word}' 단어로 검색한 결과:")
+    for post in post_list:
+        if specific_word.lower() in post.title.lower() or specific_word.lower() in post.content.lower():
+            print(f"작성자: {post.author}\n제목: {post.title}\n내용: {post.content}\n")
+else:
+    print("올바른 옵션을 선택해주세요.")
+
