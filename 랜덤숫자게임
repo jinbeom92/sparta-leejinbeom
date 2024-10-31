@@ -1,71 +1,106 @@
 import random
+import matplotlib.pyplot as plt
+import re
 
 
 def game():
     num = random.randint(1, 100)
     count = 0
-    num_a = 100
-    print('숫자를 맞춰보세요!')
+    print("숫자를 맞춰보세요!")
     while True:
         try:
             admin = input("숫자를 입력하세요 (끝내고 싶으면 '종료'를 입력해주세요!): ")
-            if admin.lower() == '종료':
+            if admin.lower() == "종료":
                 return None
             admin = int(admin)
             if admin < 1 or admin > 100:
-                print('----1에서 100 사이의 숫자를 입력하세요!----')
+                print("----1에서 100 사이의 숫자를 입력하세요!----")
                 continue
             count += 1
             if admin == num:
-                print('----------{}정답입니다!----------'.format(admin))
-                print('시도 횟수: ' + str(count))
+                print("----------{} 정답입니다!----------".format(admin))
+                print("시도 횟수: " + str(count))
                 return count
-            elif num < admin:
-                print('----------{}보다 작습니다!----------'.format(admin))
-                print('시도 횟수: ' + str(count))
+            elif admin > num:
+                print("----------{}보다 작습니다!----------".format(admin))
             else:
-                print('----------{}보다 큽니다!----------'.format(admin))
-                print('시도 횟수: ' + str(count))
+                print("----------{}보다 큽니다!----------".format(admin))
+            print("시도 횟수: " + str(count))
         except ValueError:
-            print('-----숫자만 입력해주세요!-----')
+            print("-----숫자만 입력해주세요!-----")
 
 
 def main():
     users = {}
     while True:
-        nickname = input('닉네임을 입력해주세요!: ')
-        if nickname in users:
-            print('이전 게임 최고 시도 횟수:', users[nickname])
-        print("게임을 시작하려면 '시작'를 입력하세요!")
-        now = input("입력: ")
-        if now.lower() == '시작':
-            game_result = game()
-            if game_result is not None:
-                if nickname in users:
-                    if game_result < users[nickname]:
-                        users[nickname] = game_result
-                else:
-                    users[nickname] = game_result
-        restart = input('게임을 다시 시작하겠습니까? (네, 아니요): ')
-        if restart.lower() != '네':
-            print('게임을 종료합니다!')
+        nickname = input("닉네임을 입력해주세요 (영어만 가능): ")
 
+        if not re.match("^[A-Za-z]*$", nickname):
+            print("영어만 입력할 수 있습니다. 다시 입력해주세요.")
+            continue
+
+        if nickname in users:
+            print("이전 게임 최고 시도 횟수:", users[nickname])
+
+        while True:
+            print("게임을 시작하려면 '시작'를 입력하세요!")
+            now = input("입력: ")
+            if now.lower() == "시작":
+                break
+            else:
+                print("올바른 입력이 아닙니다. '시작'을 입력해주세요.")
+
+        game_result = game()
+        if game_result is not None:
             if nickname in users:
-                users[nickname] = min(
-                    users[nickname], users.get(nickname, float('inf')))
+                if game_result < users[nickname]:
+                    users[nickname] = game_result
+            else:
+                users[nickname] = game_result
+
+        while True:
+            restart = input("게임을 다시 시작하겠습니까? (네, 아니요): ")
+            if restart.lower() in ["네", "아니요"]:
+                break
+            else:
+                print("'네' 또는 '아니요'를 입력해주세요.")
+
+        if restart.lower() != "네":
+            print("게임을 종료합니다!")
             sorted_users = sorted(users.items(), key=lambda x: x[1])
             rank = 1
-            prev_score = float('inf')
+            prev_score = float("inf")
+            x = []
+            y = []
             for user, score in sorted_users:
                 if score != prev_score:
-                    print('{}위 {} 최고 시도 횟수는 {}번 입니다!'.format(rank, user, score))
+                    print(
+                        "{}위 {} 최고 시도 횟수는 {}번 입니다!".format(
+                            rank, user, score
+                        )
+                    )
+                    x.append(user)
+                    y.append(score)
+                    prev_score = score
                 else:
-                    print('{}위 {} 최고 시도 횟수는 {}번 입니다!'.format(
-                        rank - 1, user, score))
+                    print(
+                        "{}위 {} 최고 시도 횟수는 {}번 입니다!".format(
+                            rank - 1, user, score
+                        )
+                    )
+                    x.append(user)
+                    y.append(score)
                 rank += 1
-                prev_score = score
+
+            plt.figure(figsize=(10, 6))
+            plt.barh(x, y, color="skyblue")
+            plt.xlabel("Count")
+            plt.ylabel("Users")
+            plt.title("Game Score")
+            plt.gca().invert_yaxis()
+            plt.show()
             break
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
